@@ -61,6 +61,15 @@ namespace RankingLibrary.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 32.
+        /// </summary>
+        internal static string DefaultEloKNumber {
+            get {
+                return ResourceManager.GetString("DefaultEloKNumber", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to UNKNOWN PLAYER.
         /// </summary>
         internal static string DefaultPlayerName {

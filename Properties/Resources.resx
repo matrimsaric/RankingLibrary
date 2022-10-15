@@ -117,6 +117,10 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="DefaultEloKNumber" xml:space="preserve">
+    <value>32</value>
+    <comment>Go high if many games and low if few (lower causes more fluctuation in result)</comment>
+  </data>
   <data name="DefaultPlayerName" xml:space="preserve">
     <value>UNKNOWN PLAYER</value>
     <comment>Holds default player name for when none is provided</comment>
