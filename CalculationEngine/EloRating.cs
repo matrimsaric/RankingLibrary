@@ -33,7 +33,7 @@ namespace RankingLibrary.CalculationEngine
         /// <param name="player2"></param>
         /// <param name="outcome"></param>
         /// <returns></returns>
-        public override bool GetElo(ref Elo player1, ref Elo player2, GAME_RESULT outcome)
+        public override bool GetRating(ref Elo player1, ref Elo player2, GAME_RESULT outcome)
         {
             try
             {

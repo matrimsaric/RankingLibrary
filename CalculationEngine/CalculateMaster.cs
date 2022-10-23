@@ -15,7 +15,11 @@ namespace RankingLibrary.CalculationEngine
     }
     public abstract class CalculateMaster
     {
-        public abstract bool GetElo(ref Elo player1, ref Elo player2, GAME_RESULT outcome);
+        public abstract bool GetRating(ref Elo player1, ref Elo player2, GAME_RESULT outcome);
+
+        public virtual double GetDefaultRating() { return 1500; }
+
+        
 
         public static void ExpectationToWin(double player1Rating, double player2Rating, out double p1Value, out double p2Value)
         {
