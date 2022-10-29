@@ -16,6 +16,18 @@ namespace RankingLibrary.SupportObjects.PlayerObjects
 
         public Elo(int playerId, double eloValue, double deviationValue, DateTime dataCreated)
         {
+            if(playerId <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(playerId));
+            }
+            if(eloValue <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(eloValue));
+            }
+            if (deviationValue <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(deviationValue));
+            }
             PlayerId = playerId;
             EloValue = eloValue;
             DeviationValue = deviationValue;

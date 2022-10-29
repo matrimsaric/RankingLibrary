@@ -1,4 +1,6 @@
 ﻿using RankingLibrary.CalculationEngine;
+using RankingLibrary.Properties;
+using RankingLibrary.Security;
 using RankingLibrary.SupportObjects.PlayerObjects;
 using System;
 using System.Collections.Generic;
@@ -10,6 +12,7 @@ namespace RankingLibrary.SupportObjects.RatingObjects
 {
     public class Rating : Player
     {
+        private TextValidator textValidator = new TextValidator();
         private readonly RatingCalculator ratingCalculator;
 
         public double RatingValue { get; private set; }
@@ -23,8 +26,10 @@ namespace RankingLibrary.SupportObjects.RatingObjects
         internal double WorkingVolatility { get;  set; }
 
 
-        public Rating(int id, string name, RatingCalculator ratingCalculator) : base(id, name)
+        public Rating(int id, string usName, RatingCalculator ratingCalculator) : base(id, usName)
         {
+            
+
             this.ratingCalculator = ratingCalculator;
             this.RatingValue = ratingCalculator.GetDefaultRating();
             this.RatingDeviation = ratingCalculator.GetDefaultRatingDeviation();
@@ -32,9 +37,22 @@ namespace RankingLibrary.SupportObjects.RatingObjects
 
         }
 
-        public Rating(int id, string name, RatingCalculator ratingCalculator, double initRating, double initDeviation, double initVolatility) : base(id, name)
+        public Rating(int id, string usName, RatingCalculator ratingCalculator, double initRating, double initDeviation, double initVolatility) : base(id, usName)
         {
             this.ratingCalculator = ratingCalculator;
+
+            if (initRating <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(initRating));
+            }
+            if (initDeviation <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(initDeviation));
+            }
+            if (initVolatility <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(initVolatility));
+            }
             this.RatingValue = initRating;
             this.RatingDeviation = initDeviation;
             this.Volatility = initVolatility;

@@ -33,6 +33,10 @@ namespace RankingLibrary.SupportObjects.PlayerObjects
 
         public Player(int id, string usName)
         {
+            if(id < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(id));
+            }
             Id = id;
 
             string sName = String.Empty;
