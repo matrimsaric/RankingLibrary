@@ -26,7 +26,7 @@ namespace RankingLibrary.SupportObjects.RatingObjects
         internal double WorkingVolatility { get;  set; }
 
 
-        public Rating(int id, string usName, RatingCalculator ratingCalculator) : base(id, usName)
+        public Rating(int id, RatingCalculator ratingCalculator) : base(id)
         {
             
 
@@ -37,7 +37,7 @@ namespace RankingLibrary.SupportObjects.RatingObjects
 
         }
 
-        public Rating(int id, string usName, RatingCalculator ratingCalculator, double initRating, double initDeviation, double initVolatility) : base(id, usName)
+        public Rating(int id, RatingCalculator ratingCalculator, double initRating, double initDeviation, double initVolatility) : base(id)
         {
             this.ratingCalculator = ratingCalculator;
 

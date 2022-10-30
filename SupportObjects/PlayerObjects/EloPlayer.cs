@@ -11,7 +11,7 @@ namespace RankingLibrary.SupportObjects.PlayerObjects
         public Elo CurrentElo { get; set; }
         public List<Elo> HistoricalElo { get; set; }
 
-        public EloPlayer(int id, string name, Elo liveElo) : base(id, name)
+        public EloPlayer(int id, Elo liveElo) : base(id)
         {
             CurrentElo = liveElo;
             HistoricalElo = new List<Elo>();

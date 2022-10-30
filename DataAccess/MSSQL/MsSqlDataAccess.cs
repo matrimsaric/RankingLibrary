@@ -2,12 +2,13 @@
 using RankingLibrary.SupportObjects.PlayerObjects;
 using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using System.Diagnostics.Contracts;
 
 namespace RankingLibrary.DataAccess.MSSQL
 {
@@ -49,14 +50,25 @@ namespace RankingLibrary.DataAccess.MSSQL
                 // get first row and populate fields
                 DataRow initial = response.Rows[0];
                 string name = (string)initial["Name"];
+                STATUS stat = (STATUS)initial["Status"];
+                DateTime creDte = (DateTime)initial["CreatedDate"];
 
-                Player newPlayer = new Player(idToLoad, name);
+                DateTime? inactiveDate = null;
+                if (stat != STATUS.ACTIVE && stat != STATUS.WATCH)
+                {
+                    inactiveDate = (DateTime)initial["InactiveDate"];
+                }
+
+                
+
+                Player newPlayer = new Player(idToLoad, name, stat, creDte, inactiveDate);
 
                 return Task.FromResult(newPlayer);
 
             }
             throw new Exception("Player Not Found");
         }
+
 
         public override Task<bool> SaveBasePlayer(Player currentPlayer)
         {
@@ -65,6 +77,9 @@ namespace RankingLibrary.DataAccess.MSSQL
             
             cmd.Parameters.Add("@Id", SqlDbType.Int).Value = currentPlayer.Id;
             cmd.Parameters.Add("@Name", SqlDbType.NVarChar, 200).Value = currentPlayer.Name;
+            cmd.Parameters.Add("@Status", SqlDbType.Int).Value = (int)currentPlayer.PlayerStatus;
+            cmd.Parameters.Add("@CreatedDate", SqlDbType.DateTime).Value = currentPlayer.DateRegistered;
+
 
             try
             {
@@ -76,6 +91,27 @@ namespace RankingLibrary.DataAccess.MSSQL
             }
 
             return Task.FromResult(true);
+        }
+
+        public override int GetNewPlayerId()
+        {
+            string sql = "SELECT ISNULL(MAX(Id),0) FROM Player";
+
+            DataTable response = sqlClient.GetData(sql);
+
+
+            if (response.Rows.Count > 0)
+            {
+                int currentHighestId = Convert.ToInt32(response.Rows[0][0].ToString());
+
+                currentHighestId += 1;
+
+                return currentHighestId;
+            }
+            else
+            {
+                return 1;
+            }
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using System.Data;
 using System.Linq;
 using System.Text;
@@ -10,7 +10,7 @@ namespace RankingLibrary.DataAccess.MSSQL
 {
     internal class SqlDataAccess
     {
-        private string connectionString = "Data Source=DESKTOP-PNSFQ01;Initial Catalog=RANKING;Integrated Security=true;";// TODO Need to pass these in somehow
+        private string connectionString = "Data Source=DESKTOP-PNSFQ01;Initial Catalog=RANKING;Integrated Security=true;TrustServerCertificate=True;";// TODO Need to pass these in somehow
 
         internal SqlDataAccess()
         {

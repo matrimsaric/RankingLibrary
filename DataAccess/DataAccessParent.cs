@@ -16,5 +16,7 @@ namespace RankingLibrary.DataAccess
         public abstract Task<bool> DeleteBasePlayer(Player currentPlayer);
 
         public abstract Task<bool> DeletePlayerFromId(int playerId);
+
+        public abstract int GetNewPlayerId();
     }
 }
