@@ -3,6 +3,7 @@ using RankingLibrary.Properties;
 using RankingLibrary.Security;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -32,6 +33,14 @@ namespace RankingLibrary.SupportObjects.PlayerObjects
 
         public DateTime? DateInactive { get; set; }
 
+        public double LiveRating { get; set; }
+
+        public double LiveDeviation { get; set; }
+
+        public double LiveVolatility { get; set; }
+
+        public DataTable HistoricalRatings { get; set; }
+
         public Player(string usName)
         {
             // TODO get highest ID from DB to use
@@ -40,6 +49,10 @@ namespace RankingLibrary.SupportObjects.PlayerObjects
             string sName = String.Empty;
             PlayerStatus = STATUS.ACTIVE;
             DateRegistered = DateTime.Now;
+            LiveRating = 1500;// TODO from settings
+            LiveDeviation = 350;// TODO from settings
+            LiveVolatility = 0.06;// TODO from settings
+            HistoricalRatings = new DataTable();// new player has no ratings
 
             if (textValidator.ValidateText(usName, out sName))
             {
@@ -61,12 +74,16 @@ namespace RankingLibrary.SupportObjects.PlayerObjects
 
             // load player
             Task<Player> loadedPlayer = dataAccess.GetLiveDataAccess().LoadBasePlayer(Id);
-            if(loadedPlayer.Result != null)
+            if (loadedPlayer.Result != null)
             {
                 Name = loadedPlayer.Result.Name;
                 PlayerStatus = loadedPlayer.Result.PlayerStatus;
                 DateRegistered = loadedPlayer.Result.DateRegistered;
                 DateInactive = loadedPlayer.Result.DateInactive;
+
+                LoadLiveRatingData();               
+
+               
             }
             else
             {
@@ -101,12 +118,76 @@ namespace RankingLibrary.SupportObjects.PlayerObjects
             {
                 DateInactive = dateInactive;
             }
-            
+
+            LoadLiveRatingData();
+
         }
 
-        public void SavePlayer()
+        private void LoadLiveRatingData()
         {
-            dataAccess.GetLiveDataAccess().SaveBasePlayer(this);
+            // load latest rating and if not found collect default
+            Task<DataTable> liveRating = dataAccess.GetLiveDataAccess().GetLiveRating(Id);
+
+            LiveRating = 1500;// TODO from settings (default here in case of load fail)
+            LiveDeviation = 350;// TODO from settings(default here in case of load fail)
+            LiveVolatility = 0.06;// TODO from settings(default here in case of load fail)
+
+            if (liveRating.Result != null)
+            {
+                DataRow ratingRow = liveRating.Result.Rows[0];
+
+
+                if (ratingRow["Rating"] != null)
+                {
+                    double rat1 = 0;
+
+                    bool worked = Double.TryParse(ratingRow["Rating"].ToString(), out rat1);
+                    if (worked)
+                    {
+                        LiveRating = rat1;
+                    }
+                }
+                if (ratingRow["Deviation"] != null)
+                {
+                    double rat1 = 0;
+
+                    bool worked = Double.TryParse(ratingRow["Deviation"].ToString(), out rat1);
+                    if (worked)
+                    {
+                        LiveDeviation = rat1;
+                    }
+                }
+                if (ratingRow["Volatility"] != null)
+                {
+                    double rat1 = 0;
+
+                    bool worked = Double.TryParse(ratingRow["Volatility"].ToString(), out rat1);
+                    if (worked)
+                    {
+                        LiveVolatility = rat1;
+                    }
+                }
+
+
+            }
+        }
+
+        public void SavePlayer(bool infoOnly)
+        {
+            dataAccess.GetLiveDataAccess().SaveBasePlayer(this, infoOnly);
+        }
+
+        public DataTable GetHistoricalRatings()
+        {
+            // then try and load historical ratings
+            Task<DataTable> historicalRatings = dataAccess.GetLiveDataAccess().GetHistoricalRatings(Id);
+
+            if (historicalRatings.Result != null)
+            {
+                HistoricalRatings = historicalRatings.Result;
+            }
+
+            return HistoricalRatings;
         }
     }
 }

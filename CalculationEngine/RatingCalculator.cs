@@ -13,12 +13,12 @@ namespace RankingLibrary.CalculationEngine
 {
     public class RatingCalculator : CalculateMaster
     {
-        private const double DEFAULT_RATING = 1500;
-        private const double DEFAULT_DEVIATION = 350;
-        private const double DEFAULT_VOLATILITY = 0.06;
-        private const double DEFAULT_TAU = 0.75;
-        private const double MULTIPLIER = 173.7178;
-        private const double CONVERGENCE_TOLERANCE = 0.000001;
+        private const double DEFAULT_RATING = 1500;// TODO from settings
+        private const double DEFAULT_DEVIATION = 350;// TODO from settings
+        private const double DEFAULT_VOLATILITY = 0.06;// TODO from settings
+        private const double DEFAULT_TAU = 0.75;// TODO from settings
+        private const double MULTIPLIER = 173.7178;// TODO from settings
+        private const double CONVERGENCE_TOLERANCE = 0.000001;// TODO from settings
 
         private readonly double tau;
         private readonly double defaultVolatility;

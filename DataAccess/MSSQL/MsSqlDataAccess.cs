@@ -70,7 +70,7 @@ namespace RankingLibrary.DataAccess.MSSQL
         }
 
 
-        public override Task<bool> SaveBasePlayer(Player currentPlayer)
+        public override Task<bool> SaveBasePlayer(Player currentPlayer, bool infoOnly)
         {
             SqlCommand cmd = new SqlCommand("SavePlayer");
             cmd.CommandType = CommandType.StoredProcedure;
@@ -84,6 +84,16 @@ namespace RankingLibrary.DataAccess.MSSQL
             try
             {
                 sqlClient.ExecuteCommand(cmd);
+
+                if(infoOnly == false)
+                {
+                    // Allowing save Player worked then also save Rating data
+                    // this allows ratings data to be only saved with a new player,
+                    // in all other cases it needs specific handling to prevent accidental
+                    // duplication
+                    SaveLiveRating(currentPlayer);
+                }
+                
             }
             catch (Exception exc)
             {
@@ -91,6 +101,28 @@ namespace RankingLibrary.DataAccess.MSSQL
             }
 
             return Task.FromResult(true);
+        }
+
+       private void SaveLiveRating(Player currentPlayer)
+        {
+            SqlCommand cmd = new SqlCommand("SaveRating");
+            cmd.CommandType = CommandType.StoredProcedure;
+
+            cmd.Parameters.Add("@Id", SqlDbType.Int).Value = currentPlayer.Id;
+            cmd.Parameters.Add("@Rating", SqlDbType.Decimal).Value = currentPlayer.LiveRating;
+            cmd.Parameters.Add("@Deviation", SqlDbType.Decimal).Value = (int)currentPlayer.LiveDeviation;
+            cmd.Parameters.Add("@Volatility", SqlDbType.Decimal).Value = currentPlayer.LiveVolatility;
+
+
+            try
+            {
+                sqlClient.ExecuteCommand(cmd);
+            }
+            catch (Exception exc)
+            {
+                throw new Exception("SaveRating failed", exc);
+            }
+
         }
 
         public override int GetNewPlayerId()
@@ -112,6 +144,24 @@ namespace RankingLibrary.DataAccess.MSSQL
             {
                 return 1;
             }
+        }
+
+        public override Task<DataTable> GetLiveRating(int playerId)
+        {
+            string sql = $"SELECT * FROM LiveRating WHERE PlayerId =  '{playerId}'";
+
+            DataTable response = sqlClient.GetData(sql);
+
+            return Task.FromResult(response);
+        }
+
+        public override Task<DataTable> GetHistoricalRatings(int playerId)
+        {
+            string sql = $"SELECT * FROM LiveRating WHERE PlayerId =  '{playerId}' ORDER BY DateChanged DESC ";
+
+            DataTable response = sqlClient.GetData(sql);
+
+            return Task.FromResult(response);
         }
     }
 }
