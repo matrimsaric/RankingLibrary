@@ -16,12 +16,14 @@ namespace RankingLibrary.DataAccess
 
         public abstract Task<bool> DeleteBasePlayer(Player currentPlayer);
 
-        public abstract Task<bool> DeletePlayerFromId(int playerId);
+        public abstract Task<bool> DeletePlayer(int playerId);
 
         public abstract int GetNewPlayerId();
 
         public abstract Task<DataTable> GetLiveRating(int playerId);
 
         public abstract Task<DataTable> GetHistoricalRatings(int playerId);
+
+
     }
 }

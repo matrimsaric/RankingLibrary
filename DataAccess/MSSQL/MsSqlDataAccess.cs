@@ -24,16 +24,38 @@ namespace RankingLibrary.DataAccess.MSSQL
         /// <returns></returns>
         public override Task<bool> DeleteBasePlayer(Player currentPlayer)
         {
-            string sql = $"DELETE Player WHERE Id =  '{currentPlayer.Id}'";
-            sqlClient.ExecuteNonQuery(sql);
+            SqlCommand cmd = new SqlCommand("DeletePlayer");
+            cmd.CommandType = CommandType.StoredProcedure;
+
+            cmd.Parameters.Add("@Id", SqlDbType.Int).Value = currentPlayer.Id;
+
+            try
+            {
+                sqlClient.ExecuteCommand(cmd);
+            }
+            catch (Exception exc)
+            {
+                throw new Exception("DeletePlayer failed", exc);
+            }
 
             return Task.FromResult(true);
         }
 
-        public override Task<bool> DeletePlayerFromId(int playerId)
+        public override Task<bool> DeletePlayer(int playerId)
         {
-            string sql = $"DELETE Player WHERE Id =  '{playerId}'";
-            sqlClient.ExecuteNonQuery(sql);
+            SqlCommand cmd = new SqlCommand("DeletePlayer");
+            cmd.CommandType = CommandType.StoredProcedure;
+
+            cmd.Parameters.Add("@Id", SqlDbType.Int).Value = playerId;
+
+            try
+            {
+                sqlClient.ExecuteCommand(cmd);
+            }
+            catch (Exception exc)
+            {
+                throw new Exception("DeletePlayer failed", exc);
+            }
 
             return Task.FromResult(true);
         }
@@ -131,10 +153,27 @@ namespace RankingLibrary.DataAccess.MSSQL
 
             DataTable response = sqlClient.GetData(sql);
 
+            
+
 
             if (response.Rows.Count > 0)
             {
                 int currentHighestId = Convert.ToInt32(response.Rows[0][0].ToString());
+
+                sql = "SELECT ISNULL(MAX(Id),0) FROM ArchivePlayer";
+
+                DataTable responseArchive = sqlClient.GetData(sql);
+                if (responseArchive.Rows.Count > 0)
+                {
+                    // if there is an archived player with a higher id then we dont want to replicate
+                    // otherwise this could confuse historical structure.
+                    int currentHighestArchiveId = Convert.ToInt32(responseArchive.Rows[0][0].ToString());
+
+                    if(currentHighestArchiveId > currentHighestId)
+                    {
+                        currentHighestId = currentHighestArchiveId;
+                    }
+                }
 
                 currentHighestId += 1;
 
@@ -163,5 +202,6 @@ namespace RankingLibrary.DataAccess.MSSQL
 
             return Task.FromResult(response);
         }
+
     }
 }
