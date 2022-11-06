@@ -80,6 +80,7 @@ namespace RankingLibrary.SupportObjects.PlayerObjects
                 PlayerStatus = loadedPlayer.Result.PlayerStatus;
                 DateRegistered = loadedPlayer.Result.DateRegistered;
                 DateInactive = loadedPlayer.Result.DateInactive;
+                HistoricalRatings = new DataTable();// new player has no ratings
 
                 LoadLiveRatingData();               
 
@@ -92,6 +93,49 @@ namespace RankingLibrary.SupportObjects.PlayerObjects
 
             }
 
+        }
+
+        public Player(int playerId, bool autoCreate)
+        {
+            if (playerId < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(Id));
+            }
+            Id = playerId;
+
+            if(autoCreate == true)
+            {
+                LiveRating = 1500;// TODO from settings
+                LiveDeviation = 350;// TODO from settings
+                LiveVolatility = 0.06;// TODO from settings
+                PlayerStatus = STATUS.ACTIVE;
+                DateRegistered = DateTime.Now;
+                Name = "TEST USER";
+                SavePlayer(false);
+            }
+
+            // auto save
+
+            // load player
+            Task<Player> loadedPlayer = dataAccess.GetLiveDataAccess().LoadBasePlayer(Id);
+            if (loadedPlayer.Result != null)
+            {
+                Name = loadedPlayer.Result.Name;
+                PlayerStatus = loadedPlayer.Result.PlayerStatus;
+                DateRegistered = loadedPlayer.Result.DateRegistered;
+                DateInactive = loadedPlayer.Result.DateInactive;
+                HistoricalRatings = new DataTable();// new player has no ratings
+
+                LoadLiveRatingData();
+
+
+            }
+            else
+            {
+                // player not found throw a warning TODO TEST
+                throw new InvalidDataException($"Error accessing Player Id {Id} .");
+
+            }
         }
 
         public Player(int id, string usName, STATUS status, DateTime dateRegister, DateTime? dateInactive)
@@ -114,7 +158,8 @@ namespace RankingLibrary.SupportObjects.PlayerObjects
 
             PlayerStatus = status;
             DateRegistered = dateRegister;
-            if(dateInactive != null)
+            HistoricalRatings = new DataTable();// new player has no ratings
+            if (dateInactive != null)
             {
                 DateInactive = dateInactive;
             }
@@ -175,6 +220,11 @@ namespace RankingLibrary.SupportObjects.PlayerObjects
         public void SavePlayer(bool infoOnly)
         {
             dataAccess.GetLiveDataAccess().SaveBasePlayer(this, infoOnly);
+        }
+
+        public void DeletePlayer(bool ifTestClear)
+        {
+            dataAccess.GetLiveDataAccess().DeleteBasePlayer(this, ifTestClear);
         }
 
         public DataTable GetHistoricalRatings()

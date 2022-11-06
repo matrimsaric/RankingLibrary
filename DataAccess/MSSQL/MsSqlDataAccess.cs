@@ -22,12 +22,13 @@ namespace RankingLibrary.DataAccess.MSSQL
         /// </summary>
         /// <param name="currentPlayer"></param>
         /// <returns></returns>
-        public override Task<bool> DeleteBasePlayer(Player currentPlayer)
+        public override Task<bool> DeleteBasePlayer(Player currentPlayer, bool ifTestClear)
         {
             SqlCommand cmd = new SqlCommand("DeletePlayer");
             cmd.CommandType = CommandType.StoredProcedure;
 
             cmd.Parameters.Add("@Id", SqlDbType.Int).Value = currentPlayer.Id;
+            cmd.Parameters.Add("@IfTestClear", SqlDbType.Bit).Value = ifTestClear;
 
             try
             {
@@ -41,12 +42,13 @@ namespace RankingLibrary.DataAccess.MSSQL
             return Task.FromResult(true);
         }
 
-        public override Task<bool> DeletePlayer(int playerId)
+        public override Task<bool> DeletePlayer(int playerId, bool ifTestClear)
         {
             SqlCommand cmd = new SqlCommand("DeletePlayer");
             cmd.CommandType = CommandType.StoredProcedure;
 
             cmd.Parameters.Add("@Id", SqlDbType.Int).Value = playerId;
+            cmd.Parameters.Add("@IfTestClear", SqlDbType.Bit).Value = ifTestClear;
 
             try
             {
