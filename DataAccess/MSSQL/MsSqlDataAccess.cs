@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using System.Diagnostics.Contracts;
+using Microsoft.IdentityModel.Tokens;
 
 namespace RankingLibrary.DataAccess.MSSQL
 {
@@ -78,9 +79,23 @@ namespace RankingLibrary.DataAccess.MSSQL
                 DateTime creDte = (DateTime)initial["CreatedDate"];
 
                 DateTime? inactiveDate = null;
-                if (stat != STATUS.ACTIVE && stat != STATUS.WATCH)
+                if (stat != STATUS.ACTIVE && stat != STATUS.WATCH )
                 {
-                    inactiveDate = (DateTime)initial["InactiveDate"];
+                    if(initial["InactiveDate"] != null)
+                    {
+                        string inData = initial["InactiveDate"].ToString();
+                        DateTime tempDate = DateTime.Now;
+
+                        bool tryParse = DateTime.TryParse(inData, out tempDate);
+
+                        if(tryParse == true)
+                        {
+                            inactiveDate = tempDate;
+                        }
+
+                        
+                    }
+                    
                 }
 
                 
@@ -96,14 +111,25 @@ namespace RankingLibrary.DataAccess.MSSQL
 
         public override Task<bool> SaveBasePlayer(Player currentPlayer, bool infoOnly)
         {
-            SqlCommand cmd = new SqlCommand("SavePlayer");
+            SqlCommand cmd = new SqlCommand("SavePlayerMakeInactive");
+            bool runInactiveCommand = true;
+            if(currentPlayer.PlayerStatus == STATUS.ACTIVE || currentPlayer.PlayerStatus == STATUS.WATCH || currentPlayer.DateInactive == null)
+            {
+                cmd = new SqlCommand("SavePlayer");
+                runInactiveCommand = false;
+            }
             cmd.CommandType = CommandType.StoredProcedure;
             
             cmd.Parameters.Add("@Id", SqlDbType.Int).Value = currentPlayer.Id;
             cmd.Parameters.Add("@Name", SqlDbType.NVarChar, 200).Value = currentPlayer.Name;
             cmd.Parameters.Add("@Status", SqlDbType.Int).Value = (int)currentPlayer.PlayerStatus;
             cmd.Parameters.Add("@CreatedDate", SqlDbType.DateTime).Value = currentPlayer.DateRegistered;
-
+            
+            if(runInactiveCommand == true)
+            {
+                cmd.Parameters.Add("@InactiveDate", SqlDbType.DateTime).Value = currentPlayer.DateInactive;
+            }
+            
 
             try
             {
@@ -149,7 +175,7 @@ namespace RankingLibrary.DataAccess.MSSQL
 
         }
 
-        public override int GetNewPlayerId()
+        public override int GetNewPlayerId(bool liveOnly)
         {
             string sql = "SELECT ISNULL(MAX(Id),0) FROM Player";
 
@@ -162,20 +188,24 @@ namespace RankingLibrary.DataAccess.MSSQL
             {
                 int currentHighestId = Convert.ToInt32(response.Rows[0][0].ToString());
 
-                sql = "SELECT ISNULL(MAX(Id),0) FROM ArchivePlayer";
-
-                DataTable responseArchive = sqlClient.GetData(sql);
-                if (responseArchive.Rows.Count > 0)
+                if (liveOnly == false)
                 {
-                    // if there is an archived player with a higher id then we dont want to replicate
-                    // otherwise this could confuse historical structure.
-                    int currentHighestArchiveId = Convert.ToInt32(responseArchive.Rows[0][0].ToString());
+                    sql = "SELECT ISNULL(MAX(Id),0) FROM ArchivePlayer";
 
-                    if(currentHighestArchiveId > currentHighestId)
+                    DataTable responseArchive = sqlClient.GetData(sql);
+                    if (responseArchive.Rows.Count > 0)
                     {
-                        currentHighestId = currentHighestArchiveId;
+                        // if there is an archived player with a higher id then we dont want to replicate
+                        // otherwise this could confuse historical structure.
+                        int currentHighestArchiveId = Convert.ToInt32(responseArchive.Rows[0][0].ToString());
+
+                        if (currentHighestArchiveId > currentHighestId)
+                        {
+                            currentHighestId = currentHighestArchiveId;
+                        }
                     }
                 }
+                
 
                 currentHighestId += 1;
 

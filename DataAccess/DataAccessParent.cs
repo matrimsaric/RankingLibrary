@@ -18,11 +18,13 @@ namespace RankingLibrary.DataAccess
 
         public abstract Task<bool> DeletePlayer(int playerId, bool ifTestClear);
 
-        public abstract int GetNewPlayerId();
+        public abstract int GetNewPlayerId(bool liveOnly);
 
         public abstract Task<DataTable> GetLiveRating(int playerId);
 
         public abstract Task<DataTable> GetHistoricalRatings(int playerId);
+
+
 
 
 

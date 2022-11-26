@@ -41,10 +41,11 @@ namespace RankingLibrary.SupportObjects.PlayerObjects
 
         public DataTable HistoricalRatings { get; set; }
 
+
         public Player(string usName)
         {
             // TODO get highest ID from DB to use
-            Id = dataAccess.GetLiveDataAccess().GetNewPlayerId();
+            Id = dataAccess.GetLiveDataAccess().GetNewPlayerId(false);
 
             string sName = String.Empty;
             PlayerStatus = STATUS.ACTIVE;
